@@ -32,13 +32,15 @@ module Task.Script.Syntax
   )
 where
 
-import qualified Data.HashMap.Strict as HashMap
+import Data.HashMap.Strict.InsOrd (InsOrdHashMap)
+import qualified Data.HashMap.Strict.InsOrd as HashMap
+import Data.HashSet.InsOrd (InsOrdHashSet)
 
 ---- Synonyms ------------------------------------------------------------------
 
-type Row a = HashMap Label a
+type Row a = InsOrdHashMap Label a
 
-type Labels = HashSet Label
+type Labels = InsOrdHashSet Label
 
 type Name = Text
 

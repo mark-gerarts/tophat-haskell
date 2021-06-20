@@ -1,6 +1,8 @@
 module Task.Observe where
 
-import qualified Data.HashMap.Strict as HashMap
+import Data.HashMap.Strict.InsOrd (InsOrdHashMap)
+import qualified Data.HashMap.Strict.InsOrd as HashMap
+import qualified Data.HashSet.InsOrd as HashSet
 import Data.List (union)
 import qualified Data.Store as Store
 import Polysemy
@@ -45,7 +47,7 @@ ui' n = \case
   Enter -> pure <| concat ["⊠^", display n, " [ ] "]
   Update b -> pure <| concat ["□^", display n, " [ ", display b, " ]"]
   View b -> pure <| concat ["⧇^", display n, " [ ", display b, " ]"]
-  Select ts -> pure <| concat ["◇^", display n, " ", display <| HashMap.keysSet ts]
+  Select ts -> pure <| concat ["◇^", display n, " ", display <| HashSet.fromList <| HashMap.keys ts]
   Change l -> pure (\b -> concat ["⊟^", display n, " [ ", display b, " ]"]) -< Store.read l
   Watch l -> pure (\b -> concat ["⧈^", display n, " [ ", display b, " ]"]) -< Store.read l
 
@@ -160,7 +162,7 @@ options = \case
 -- | Notes:
 -- | * Goes one level deep!
 labels ::
-  HashMap Label (Task h a) -> -- There is no need for any effects.
+  InsOrdHashMap Label (Task h a) -> -- There is no need for any effects.
   List Label
 labels = HashMap.keys << HashMap.filter (not << failing)
 

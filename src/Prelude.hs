@@ -1,5 +1,5 @@
-{-# OPTIONS_GHC -Wno-orphans -Wno-deprecations #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# OPTIONS_GHC -Wno-orphans -Wno-deprecations #-}
 
 module Prelude
   ( -- * Reexports
@@ -156,8 +156,10 @@ module Prelude
   )
 where
 
-import qualified Data.HashMap.Strict as HashMap
-import qualified Data.HashSet as HashSet
+import Data.HashMap.Strict.InsOrd (InsOrdHashMap)
+import qualified Data.HashMap.Strict.InsOrd as HashMap
+import Data.HashSet.InsOrd (InsOrdHashSet)
+import qualified Data.HashSet.InsOrd as HashSet
 import qualified Data.Text as Text
 import Data.Type.Equality
 import Relude hiding
@@ -323,10 +325,10 @@ instance (Display a, Display b) => Display (a, b) where
 instance (Display a) => Display (List a) where
   display = map display >> intercalate "," >> between '[' ']'
 
-instance (Display k, Display v) => Display (HashMap k v) where
+instance (Display k, Display v) => Display (InsOrdHashMap k v) where
   display = HashMap.toList >> map (\(k, v) -> display k ++ ":" ++ display v) >> intercalate "," >> between '{' '}'
 
-instance (Display v) => Display (HashSet v) where
+instance (Display v) => Display (InsOrdHashSet v) where
   display = HashSet.toList >> map display >> intercalate "," >> between '{' '}'
 
 instance Display (TypeRep a) where
@@ -379,7 +381,7 @@ indent n t = Text.replicate n " " ++ t
 
 ---- HashMaps
 
-forWithKey :: Applicative f => HashMap k v -> (k -> v -> f w) -> f (HashMap k w)
+forWithKey :: Applicative f => InsOrdHashMap k v -> (k -> v -> f w) -> f (InsOrdHashMap k w)
 forWithKey = flip HashMap.traverseWithKey
 {-# INLINE forWithKey #-}
 
@@ -389,11 +391,11 @@ infix 4 =<
 
 infix 4 /<
 
-(=<) :: Hash a => a -> HashSet a -> Bool
+(=<) :: Hash a => a -> InsOrdHashSet a -> Bool
 (=<) = HashSet.member
 {-# INLINE (=<) #-}
 
-(/<) :: Hash a => a -> HashSet a -> Bool
+(/<) :: Hash a => a -> InsOrdHashSet a -> Bool
 (/<) x = not << HashSet.member x
 {-# INLINE (/<) #-}
 

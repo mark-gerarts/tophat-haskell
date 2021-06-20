@@ -1,6 +1,6 @@
 module Task.Run where
 
-import qualified Data.HashMap.Strict as HashMap
+import qualified Data.HashMap.Strict.InsOrd as HashMap
 import Data.List (intersect, union)
 import qualified Data.Store as Store
 import Polysemy

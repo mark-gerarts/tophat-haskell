@@ -42,7 +42,8 @@ module Task
 where
 
 import Data.Basic
-import qualified Data.HashMap.Strict as HashMap
+import Data.HashMap.Strict.InsOrd (InsOrdHashMap)
+import qualified Data.HashMap.Strict.InsOrd as HashMap
 import Data.Some
 import Data.Store
 import Prelude hiding (guard, repeat)
@@ -115,7 +116,7 @@ data Editor h t where
   -- | Valued, view only editor
   View :: (Basic t) => t -> Editor h t
   -- | External choice between multple tasks.
-  Select :: HashMap Label (Task h t) -> Editor h t
+  Select :: InsOrdHashMap Label (Task h t) -> Editor h t
   -- | Change to a reference of type `t` to a value
   Change :: (Basic t) => Store h t -> Editor h t
   -- | Watch a reference of type `t`
@@ -148,7 +149,7 @@ update v = new (Update v)
 view :: (Basic t) => t -> Task h t
 view v = new (View v)
 
-select :: HashMap Label (Task h t) -> Task h t
+select :: InsOrdHashMap Label (Task h t) -> Task h t
 select ts = new (Select ts)
 
 ---- Shares
@@ -185,7 +186,7 @@ choose :: List (Task h a) -> Task h a
 -- choose xs = xs .\ fail <| (<|>)
 choose = foldr (<|>) fail
 
-guard :: HashMap Label (Bool, Task h a) -> Task h a
+guard :: InsOrdHashMap Label (Bool, Task h a) -> Task h a
 guard = select << HashMap.foldrWithKey go []
   where
     go l (b, t) = HashMap.insert l (if b then t else fail)
@@ -206,12 +207,12 @@ infixl 1 >>?
 
 infixl 1 >>*
 
-(>>*) :: Task h a -> HashMap Label (a -> Task h b) -> Task h b
+(>>*) :: Task h a -> InsOrdHashMap Label (a -> Task h b) -> Task h b
 (>>*) t1 cs = t1 >>= \x -> select (cs ||> \c -> c x)
 
 infixl 1 >**
 
-(>**) :: Task h a -> HashMap Label (a -> Bool, a -> Task h b) -> Task h b
+(>**) :: Task h a -> InsOrdHashMap Label (a -> Bool, a -> Task h b) -> Task h b
 (>**) t1 cs = t1 >>= \x -> select (cs ||> \(b, c) -> if b x then c x else fail)
 
 forever :: Task h a -> Task h Void
